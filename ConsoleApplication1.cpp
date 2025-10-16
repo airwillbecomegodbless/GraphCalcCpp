@@ -11,6 +11,7 @@
 
 // parts of function
 std::vector<std::string> partsOfFunction;
+std::vector<std::string> duplicate;
 std::map<std::string, int> keys;
 
 
@@ -54,16 +55,16 @@ std::string AddParantheses(std::string yFunction)
     {
         if (i > 0 && i < yFunction.length() - 1 && yFunction[i] == '*' || yFunction[i] == '/')  // ((((2+3)*((4+1)))/5))
         {
-            if (isdigit(yFunction[i + 1]) && isdigit(yFunction[i - 1]))
+            if (isalnum(yFunction[i + 1]) && isalnum(yFunction[i - 1]))
             {
                 j = i + 1;
-                while (isdigit(yFunction[j]))
+                while (isalnum(yFunction[j]))
                 {
                     j++;
                 }
                 pos1 = j;
                 j = i - 1;
-                while (isdigit(yFunction[j]))
+                while (isalnum(yFunction[j]))
                 {
                     j--;
                 }
@@ -89,11 +90,10 @@ std::string AddParantheses(std::string yFunction)
                 yFunction.insert(j + 1, 1, '(');
                 i++;
             }
-            else if (isdigit(yFunction[i + 1]) && yFunction[i - 1] == ')')
+            else if (isalnum(yFunction[i + 1]) && yFunction[i - 1] == ')')
             {
-                std::cout << "work" << std::endl;
                 j = i + 1;
-                while (isdigit(yFunction[j]))
+                while (isalnum(yFunction[j]))
                 {
                     j++;
                 }
@@ -107,7 +107,7 @@ std::string AddParantheses(std::string yFunction)
                 yFunction.insert(j + 1, 1, '(');
                 i++;
             }
-            else if (isdigit(yFunction[i - 1]) && yFunction[i + 1] == '(')
+            else if (isalnum(yFunction[i - 1]) && yFunction[i + 1] == '(')
             {
                 j = i + 1;
                 while (yFunction[j] != ')')
@@ -116,7 +116,7 @@ std::string AddParantheses(std::string yFunction)
                 }
                 pos1 = j;
                 j = i - 1;
-                while (isdigit(yFunction[j]))
+                while (isalnum(yFunction[j]))
                 {
                     j--;
                 }
@@ -126,7 +126,7 @@ std::string AddParantheses(std::string yFunction)
             }
         }
     }
-    std::cout << "Function after parentheses for * and / >>> " << yFunction << std::endl;
+    //std::cout << "Function after parentheses for * and / >>> " << yFunction << std::endl;
     for (int i = yFunction.length() - 1; i >= 0; i--)
     {
         if (yFunction[i] != '*' && yFunction[i] != '/' && yFunction[i] != '+' && yFunction[i] != '-')
@@ -134,7 +134,7 @@ std::string AddParantheses(std::string yFunction)
             if (i < yFunction.length() - 1 && yFunction[i] != ')' && yFunction[i] != '(' && yFunction[i + 1] == '(')
             {
                 pos1 = i + 1;
-                while (isalpha(yFunction[i]) || yFunction[i] == '-' || yFunction[i] == 'x')
+                while (isalnum(yFunction[i]) || yFunction[i] == '-')
                 {
                     i--;
                 }
@@ -148,7 +148,7 @@ std::string AddParantheses(std::string yFunction)
                 {
                     i++;
                 }
-                while (isalpha(yFunction[i]) || yFunction[i] == 'x')
+                while (isalnum(yFunction[i]))
                 {
                     i++;
                 }
@@ -157,7 +157,7 @@ std::string AddParantheses(std::string yFunction)
             }
         }
     }
-    std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;
+    //std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;
 	return yFunction;
 }
 
@@ -192,7 +192,7 @@ void Parentheses(std::string yFunction)
                 parenthesesNum++;
             }
         }
-        std::cout << "Number of Parentheses >>> " << parenthesesNum << std::endl;
+        //std::cout << "Number of Parentheses >>> " << parenthesesNum << std::endl;
 
         while (parenthesesNum != openParenthesesIndexes.size()) // open and closed parantheses index
         {
@@ -281,16 +281,16 @@ void Parentheses(std::string yFunction)
         }
         for (int i = 0; i < partsOfFunction.size(); i++)
         {
-            std::cout << "Part " << i << " >>> " << partsOfFunction[i] << std::endl;
+            //std::cout << "Part " << i << " >>> " << partsOfFunction[i] << std::endl;
         }
         for (auto const& [key, val] : keys)
         {
-            std::cout << "Key " << " >>> " << key << " Part >>> " << partsOfFunction[keys[key]] << std::endl;
+            //std::cout << "Key " << " >>> " << key << " Part >>> " << partsOfFunction[keys[key]] << std::endl;
         }
     }
 }
 
-float Solve()
+void Solve(int x)
 {
     double result = 0;
     char lastSign = '\0';
@@ -299,105 +299,118 @@ float Solve()
     bool neg = false;
     bool flag;
     std::string k;
-
-    for (int part = 0; part < partsOfFunction.size(); part++) // get rid of parentheses and solve
-    {
-        flag = false;
-        k = "";
-        for (int i = partsOfFunction[part].size(); i >= 0; i--)
+        for (int part = 0; part < partsOfFunction.size(); part++) // get rid of parentheses and solve
         {
-            if (partsOfFunction[part][i] == '(' && i != 0 && partsOfFunction[part][i - 1] == ')')
+            flag = false;
+            k = "";
+            for (int i = partsOfFunction[part].size(); i >= 0; i--)
             {
-                partsOfFunction[part][i] = '*';
-            }
-            else if (partsOfFunction[part][i] == '(' || partsOfFunction[part][i] == ')')
-            {
-                partsOfFunction[part].erase(i, 1);
-            }
-        }
-        for (auto const& [key, val] : keys)
-        {
-            if (partsOfFunction[part].find(key) != std::string::npos)
-            {
-                partsOfFunction[part].replace(partsOfFunction[part].find(key), key.length(), partsOfFunction[keys[key]]);
-            }
-        }
-        std::cout << "Part " << part << " >>> " << partsOfFunction[part] << std::endl;
-        for (int i = 0; i < partsOfFunction[part].size(); i++)
-        {
-            strNum = "";
-            num = 0;
-            if (partsOfFunction[part][i] == '*' || partsOfFunction[part][i] == '/' || partsOfFunction[part][i] == '-' || partsOfFunction[part][i] == '+')
-            {
-                if (partsOfFunction[part][i] == '-' && i > 0 && (partsOfFunction[part][i - 1] == '*' || partsOfFunction[part][i - 1] == '/' || partsOfFunction[part][i - 1] == '-' || partsOfFunction[part][i - 1] == '+'))
+                if (partsOfFunction[part][i] == '(' && i != 0 && partsOfFunction[part][i - 1] == ')')
                 {
-                    neg = true;
+                    partsOfFunction[part][i] = '*';
                 }
-                else
+                else if (partsOfFunction[part][i] == '(' || partsOfFunction[part][i] == ')')
                 {
-                    lastSign = partsOfFunction[part][i];
+                    partsOfFunction[part].erase(i, 1);
                 }
             }
-            if (isdigit(partsOfFunction[part][i]))
+            for (auto const& [key, val] : keys)
             {
-                strNum += partsOfFunction[part][i];
-                while (i < partsOfFunction[part].size() && (isdigit(partsOfFunction[part][i + 1]) || partsOfFunction[part][i + 1] == '.'))
+                if (partsOfFunction[part].find(key) != std::string::npos)
                 {
-                    i++;
-                    strNum += partsOfFunction[part][i];
+                    partsOfFunction[part].replace(partsOfFunction[part].find(key), key.length(), partsOfFunction[keys[key]]);
                 }
-                num = std::stod(strNum);
-                if (lastSign != '\0' && strNum != "")
+            }
+            //std::cout << "Part " << part << " >>> " << partsOfFunction[part] << std::endl;
+            for (int i = 0; i < partsOfFunction[part].size(); i++)
+            {
+                strNum = "";
+                num = 0;
+                if (partsOfFunction[part][i] == '*' || partsOfFunction[part][i] == '/' || partsOfFunction[part][i] == '-' || partsOfFunction[part][i] == '+')
                 {
-                    if (neg)
+                    if (partsOfFunction[part][i] == '-' && i > 0 && (partsOfFunction[part][i - 1] == '*' || partsOfFunction[part][i - 1] == '/' || partsOfFunction[part][i - 1] == '-' || partsOfFunction[part][i - 1] == '+'))
                     {
-                        num = -num;
-                        neg = false;
+                        neg = true;
                     }
-                    switch (lastSign)
+                    else
                     {
-                    case '*':
-                        result *= num;
-                        lastSign = '\0';
-                        break;
-                    case '/':
-                        result /= num;
-                        lastSign = '\0';
-                        break;
-                    case '-':
-                        result -= num;
-                        lastSign = '\0';
-                        break;
-                    case '+':
-                        result += num;
-                        lastSign = '\0';
-                        break;
-                    default:
-                        break;
+                        lastSign = partsOfFunction[part][i];
                     }
                 }
-                else if (strNum != "")
+                if (isalnum(partsOfFunction[part][i]))
                 {
-                    result = num;
+                    if (partsOfFunction[part][i] == 'x')
+                    {
+                        strNum += std::to_string(x);
+                    }
+                    else
+                    {
+                        strNum += partsOfFunction[part][i];
+                    }
+                    while (i < partsOfFunction[part].size() && (isdigit(partsOfFunction[part][i + 1]) || partsOfFunction[part][i + 1] == '.'))
+                    {
+                        i++;
+                        if (partsOfFunction[part][i] == 'x')
+                        {
+                            strNum += std::to_string(x);
+                        }
+                        else
+                        {
+                            strNum += partsOfFunction[part][i];
+                        }
+                    }
+                    num = std::stod(strNum);
+                    if (lastSign != '\0' && strNum != "")
+                    {
+                        if (neg)
+                        {
+                            num = -num;
+                            neg = false;
+                        }
+                        switch (lastSign)
+                        {
+                        case '*':
+                            result *= num;
+                            lastSign = '\0';
+                            break;
+                        case '/':
+                            result /= num;
+                            lastSign = '\0';
+                            break;
+                        case '-':
+                            result -= num;
+                            lastSign = '\0';
+                            break;
+                        case '+':
+                            result += num;
+                            lastSign = '\0';
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+                    else if (strNum != "")
+                    {
+                        result = num;
+                    }
                 }
             }
+            partsOfFunction[part] = std::to_string(result);
+            //std::cout << "Result " << part << " >>> " << partsOfFunction[part] << std::endl;
+            result = 0;
         }
-        partsOfFunction[part] = std::to_string(result);
-        std::cout << "Result " << part << " >>> " << partsOfFunction[part] << std::endl;
-        result = 0;
-    }
-	result = std::stod(partsOfFunction[partsOfFunction.size() - 1]);
-    return result;
 }
 
 int main()
 {
     // function
-    std::string yFunction = "(6/(2*(1+2)))";
+    std::string yFunction = "x*x*x*x";
     yFunction.insert(yFunction.begin(), '(');
     yFunction.push_back(')');
     yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
     std::cout << "Function >>> " << yFunction << std::endl;
+	int nStart = -6;
+	int nEnd = 6;
 
     /*for (int i = yFunction.length() - 2; i >= 1; i--)
     {
@@ -410,12 +423,25 @@ int main()
 
  	yFunction = AddParantheses(yFunction);
 
-    
-
 	Parentheses(yFunction);
 
-	float result = Solve();
-	std::cout << std::endl << "RESULT >>> " << result << std::endl;
+    if (yFunction.find('x') != std::string::npos)
+    {
+        duplicate = partsOfFunction;
+        for (int x = nStart; x <= nEnd; x++)
+        {
+            Solve(x);
+            std::cout << "x: " << x << " y: " << std::stod(partsOfFunction[partsOfFunction.size() - 1]) << std::endl;
+            partsOfFunction = duplicate;
+        }
+    }
+    else
+    {
+        Solve(0);
+		std::cout << "Result: " << std::stod(partsOfFunction[partsOfFunction.size() - 1]) << std::endl;
+    }
+    
+	//std::cout << std::endl << "RESULT >>> " << result << std::endl;
 
 
     return 0;
