@@ -9,6 +9,11 @@
 #include <algorithm>
 
 
+// parts of function
+std::vector<std::string> partsOfFunction;
+std::map<std::string, int> keys;
+
+
 class Coordinates {      
 public:            
     std::vector<int> open;
@@ -114,10 +119,8 @@ std::string AddParantheses(std::string yFunction)
 	return yFunction;
 }
 
-int main()
+void Parentheses(std::string yFunction)
 {
-    // function
-    std::string yFunction = "(3+((5+2)*2))";
     // coordinates of parentheses
     Coordinates insideOfParentheses;
     // to check for copies
@@ -127,75 +130,17 @@ int main()
     int lastOpen;
     // amount of parentheses
     int parenthesesNum = 0;
-    // parts of function
-    std::vector<std::string> partsOfFunction;
+
     // part of function
     std::string prt;
     // used parts
     std::vector<int> alreadyPart = { 99999999 };
-    // map for parts
-    std::map<std::string, int> keys;
     // key var
     std::string k;
     // flag
     bool flag = false;
     // length of key
     int keyLength = 10;
-    double result = 0;
-    char lastSign = '\0';
-    std::string strNum;
-    double num = 0;
-    bool neg = false;
-
-    int pos1;
-
-    //std::getline(std::cin, yFunction);
-    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
-    std::cout << "Function >>> " << yFunction << std::endl;
-
-    /*for (int i = yFunction.length() - 2; i >= 1; i--)
-    {
-        if (yFunction[i] == '*' && yFunction[i - 1] == ')' && yFunction[i + 1] == '(')
-        {
-            yFunction.erase(i, 1);
-        }
-    }
-    std::cout << "Function after removing * >>> " << yFunction << std::endl;*/
-
-    
-	yFunction = AddParantheses(yFunction);
-    /*for (int i = yFunction.length() - 1; i >= 0; i--)
-    {
-        if (yFunction[i] != '*' && yFunction[i] != '/' && yFunction[i] != '+')
-        {
-            if (i < yFunction.length() - 1 && yFunction[i] != ')' && yFunction[i] != '(' && yFunction[i + 1] == '(')
-            {
-                pos1 = i + 1;
-                while (isalpha(yFunction[i]) || yFunction[i] == '-' || yFunction[i] == 'x')
-                {
-                    i--;
-                }
-                yFunction.insert(i + 1, 1, ')');
-                yFunction.insert(i, 1, '(');
-            }
-            if (i > 0 && yFunction[i - 1] == ')' && yFunction[i] != '(' && yFunction[i] != ')')
-            {
-                pos1 = i;
-                if (yFunction[i] == '-')
-                {
-                    i++;
-                }
-                while (isalpha(yFunction[i]) || yFunction[i] == 'x')
-                {
-                    i++;
-                }
-                yFunction.insert(i + 1, 1, ')');
-                yFunction.insert(pos1, 1, '(');
-            }
-        }
-    }
-    std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;*/
-
     if (yFunction.find("(") != std::string::npos && yFunction.find(")") != std::string::npos) // Parentheses
     {
         for (int i = 0; i < yFunction.length(); i++)
@@ -229,7 +174,7 @@ int main()
             }
         }
 
-        for (int i = 0; i < insideOfParentheses.open.size(); i++) 
+        for (int i = 0; i < insideOfParentheses.open.size(); i++)
         {
             prt = "";
             for (int j = i - 1; j >= 0; j--) // iterate thru already included parts
@@ -240,7 +185,7 @@ int main()
                     {
                         prt = prt + yFunction.substr(insideOfParentheses.open[j] - insideOfParentheses.open[i], 1);
                     }
-                    if (yFunction.substr(insideOfParentheses.open[i] + 1, insideOfParentheses.open[j] - insideOfParentheses.open[i] - 1) != "" && yFunction.substr(insideOfParentheses.open[i] + 1, 1) != "(") 
+                    if (yFunction.substr(insideOfParentheses.open[i] + 1, insideOfParentheses.open[j] - insideOfParentheses.open[i] - 1) != "" && yFunction.substr(insideOfParentheses.open[i] + 1, 1) != "(")
                     {
                         flag = false;
                         for (auto const& [key, val] : keys)
@@ -259,7 +204,7 @@ int main()
                         }
                         if (insideOfParentheses.closed[i] - insideOfParentheses.closed[j] != 1)
                         {
-							prt = prt + yFunction.substr(insideOfParentheses.closed[j] + 1, insideOfParentheses.closed[i] - insideOfParentheses.closed[j]);
+                            prt = prt + yFunction.substr(insideOfParentheses.closed[j] + 1, insideOfParentheses.closed[i] - insideOfParentheses.closed[j]);
                         }
                     }
                     else
@@ -304,6 +249,17 @@ int main()
             std::cout << "Key " << " >>> " << key << " Part >>> " << partsOfFunction[keys[key]] << std::endl;
         }
     }
+}
+
+float Solve()
+{
+    double result = 0;
+    char lastSign = '\0';
+    std::string strNum;
+    double num = 0;
+    bool neg = false;
+    bool flag;
+    std::string k;
 
     for (int part = 0; part < partsOfFunction.size(); part++) // get rid of parentheses and solve
     {
@@ -315,7 +271,7 @@ int main()
             {
                 partsOfFunction[part][i] = '*';
             }
-            else if (partsOfFunction[part][i] == '(' || partsOfFunction[part][i] == ')' )
+            else if (partsOfFunction[part][i] == '(' || partsOfFunction[part][i] == ')')
             {
                 partsOfFunction[part].erase(i, 1);
             }
@@ -391,6 +347,64 @@ int main()
         std::cout << "Result " << part << " >>> " << partsOfFunction[part] << std::endl;
         result = 0;
     }
+	result = std::stod(partsOfFunction[partsOfFunction.size() - 1]);
+    return result;
+}
+
+int main()
+{
+    // function
+    std::string yFunction = "(3+((5+2)*2))";
+    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
+    std::cout << "Function >>> " << yFunction << std::endl;
+
+    /*for (int i = yFunction.length() - 2; i >= 1; i--)
+    {
+        if (yFunction[i] == '*' && yFunction[i - 1] == ')' && yFunction[i + 1] == '(')
+        {
+            yFunction.erase(i, 1);
+        }
+    }
+    std::cout << "Function after removing * >>> " << yFunction << std::endl;*/
+
+ 	yFunction = AddParantheses(yFunction);
+
+    /*for (int i = yFunction.length() - 1; i >= 0; i--)
+    {
+        if (yFunction[i] != '*' && yFunction[i] != '/' && yFunction[i] != '+')
+        {
+            if (i < yFunction.length() - 1 && yFunction[i] != ')' && yFunction[i] != '(' && yFunction[i + 1] == '(')
+            {
+                pos1 = i + 1;
+                while (isalpha(yFunction[i]) || yFunction[i] == '-' || yFunction[i] == 'x')
+                {
+                    i--;
+                }
+                yFunction.insert(i + 1, 1, ')');
+                yFunction.insert(i, 1, '(');
+            }
+            if (i > 0 && yFunction[i - 1] == ')' && yFunction[i] != '(' && yFunction[i] != ')')
+            {
+                pos1 = i;
+                if (yFunction[i] == '-')
+                {
+                    i++;
+                }
+                while (isalpha(yFunction[i]) || yFunction[i] == 'x')
+                {
+                    i++;
+                }
+                yFunction.insert(i + 1, 1, ')');
+                yFunction.insert(pos1, 1, '(');
+            }
+        }
+    }
+    std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;*/
+
+	Parentheses(yFunction);
+
+	int result = Solve();
+	std::cout << "RESULT >>> " << result << std::endl;
 
 
     return 0;
