@@ -41,60 +41,12 @@ std::string generateRandomString(int length)
     return random_string;
 }
 
-
-
-int main()
+std::string AddParantheses(std::string yFunction)
 {
-    // function
-    std::string yFunction = "((3+(5-2*(3+1))))";
-    // coordinates of parentheses
-    Coordinates insideOfParentheses;
-    // to check for copies
-    std::vector<int> openParenthesesIndexes;
-    std::vector<int> closedParenthesesIndexes;
-    // to choose last parentheses
-    int lastOpen;
-    // amount of parentheses
-    int parenthesesNum = 0;
-    // parts of function
-    std::vector<std::string> partsOfFunction;
-    // part of function
-    std::string prt;
-    // used parts
-    std::vector<int> alreadyPart = { 99999999 };
-    // map for parts
-    std::map<std::string, int> keys;
-    // key var
-    std::string k;
-    // flag
-    bool flag = false;
-    // length of key
-    int keyLength = 10;
-    double result = 0;
-    char lastSign = '\0';
-    std::string strNum;
-    double num = 0;
-    bool neg = false;
-
-    int pos1;
-
     int j;
-    //std::getline(std::cin, yFunction);
-    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
-    std::cout << "Function >>> " << yFunction << std::endl;
-
-    /*for (int i = yFunction.length() - 2; i >= 1; i--)
-    {
-        if (yFunction[i] == '*' && yFunction[i - 1] == ')' && yFunction[i + 1] == '(')
-        {
-            yFunction.erase(i, 1);
-        }
-    }
-    std::cout << "Function after removing * >>> " << yFunction << std::endl;*/
-
     for (int i = yFunction.length() - 1; i >= 0; i--)
     {
-        if (yFunction[i] == '*' || yFunction[i] == '/')
+        if (yFunction[i] == '*' || yFunction[i] == '/')  // 2*(3+1)
         {
             if (isdigit(yFunction[i + 1]) && isdigit(yFunction[i - 1]))
             {
@@ -126,11 +78,93 @@ int main()
                 }
                 yFunction.insert(j + 1, 1, '(');
             }
+            else if (isdigit(yFunction[i + 1]) && yFunction[i - 1] == ')')
+            {
+                j = i + 1;
+                while (isdigit(yFunction[j]))
+                {
+                    j++;
+                }
+                yFunction.insert(j, 1, ')');
+                j = i - 1;
+                while (yFunction[j] != '(')
+                {
+                    j--;
+                }
+                yFunction.insert(j + 1, 1, '(');
+            }
+            else if (isdigit(yFunction[i - 1]) && yFunction[i + 1] == '(')
+            {
+                j = i + 1;
+                while (yFunction[j] != ')')
+                {
+                    j++;
+                }
+                yFunction.insert(j, 1, ')');
+                j = i - 1;
+                while (isdigit(yFunction[j]))
+                {
+                    j--;
+                }
+                yFunction.insert(j + 1, 1, '(');
+            }
         }
     }
     std::cout << "Function after parentheses for * and / >>> " << yFunction << std::endl;
+	return yFunction;
+}
 
-    for (int i = yFunction.length() - 1; i >= 0; i--)
+int main()
+{
+    // function
+    std::string yFunction = "(3+((5+2)*2))";
+    // coordinates of parentheses
+    Coordinates insideOfParentheses;
+    // to check for copies
+    std::vector<int> openParenthesesIndexes;
+    std::vector<int> closedParenthesesIndexes;
+    // to choose last parentheses
+    int lastOpen;
+    // amount of parentheses
+    int parenthesesNum = 0;
+    // parts of function
+    std::vector<std::string> partsOfFunction;
+    // part of function
+    std::string prt;
+    // used parts
+    std::vector<int> alreadyPart = { 99999999 };
+    // map for parts
+    std::map<std::string, int> keys;
+    // key var
+    std::string k;
+    // flag
+    bool flag = false;
+    // length of key
+    int keyLength = 10;
+    double result = 0;
+    char lastSign = '\0';
+    std::string strNum;
+    double num = 0;
+    bool neg = false;
+
+    int pos1;
+
+    //std::getline(std::cin, yFunction);
+    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
+    std::cout << "Function >>> " << yFunction << std::endl;
+
+    /*for (int i = yFunction.length() - 2; i >= 1; i--)
+    {
+        if (yFunction[i] == '*' && yFunction[i - 1] == ')' && yFunction[i + 1] == '(')
+        {
+            yFunction.erase(i, 1);
+        }
+    }
+    std::cout << "Function after removing * >>> " << yFunction << std::endl;*/
+
+    
+	yFunction = AddParantheses(yFunction);
+    /*for (int i = yFunction.length() - 1; i >= 0; i--)
     {
         if (yFunction[i] != '*' && yFunction[i] != '/' && yFunction[i] != '+')
         {
@@ -160,7 +194,7 @@ int main()
             }
         }
     }
-    std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;
+    std::cout << "Function after parentheses for * >>> " << yFunction << std::endl;*/
 
     if (yFunction.find("(") != std::string::npos && yFunction.find(")") != std::string::npos) // Parentheses
     {
@@ -223,6 +257,10 @@ int main()
                             keys[k] = j;
                             prt = prt + yFunction.substr(insideOfParentheses.open[i], insideOfParentheses.open[j] - insideOfParentheses.open[i]) + "(" + k + "))";
                         }
+                        if (insideOfParentheses.closed[i] - insideOfParentheses.closed[j] != 1)
+                        {
+							prt = prt + yFunction.substr(insideOfParentheses.closed[j] + 1, insideOfParentheses.closed[i] - insideOfParentheses.closed[j]);
+                        }
                     }
                     else
                     {
@@ -239,6 +277,10 @@ int main()
                             k = generateRandomString(keyLength);
                             keys[k] = j;
                             prt = prt + "(" + k + ")";
+                        }
+                        if (insideOfParentheses.closed[i] - insideOfParentheses.closed[j] != 1)
+                        {
+                            prt = prt + yFunction.substr(insideOfParentheses.closed[j] + 1, insideOfParentheses.closed[i] - insideOfParentheses.closed[j]);
                         }
                     }
                     alreadyPart.push_back(j);
