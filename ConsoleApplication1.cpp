@@ -404,22 +404,24 @@ void Solve(int x)
 int main()
 {
     // function
-    std::string yFunction = "x*x*x*x";
+    std::string yFunction = "xxx";
     yFunction.insert(yFunction.begin(), '(');
     yFunction.push_back(')');
     yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
     std::cout << "Function >>> " << yFunction << std::endl;
 	int nStart = -6;
 	int nEnd = 6;
-
-    /*for (int i = yFunction.length() - 2; i >= 1; i--)
+    if (yFunction.find('x') != std::string::npos)
     {
-        if (yFunction[i] == '*' && yFunction[i - 1] == ')' && yFunction[i + 1] == '(')
+        for (int i = yFunction.length() - 1; i >= 0; i--)
         {
-            yFunction.erase(i, 1);
+            if (i < yFunction.length() - 1 && yFunction[i] == 'x' && yFunction[i + 1] == 'x')
+            {
+                yFunction.insert(i + 1, 1, '*');
+            }
         }
     }
-    std::cout << "Function after removing * >>> " << yFunction << std::endl;*/
+    //std::cout << "Function after removing * >>> " << yFunction << std::endl;
 
  	yFunction = AddParantheses(yFunction);
 
