@@ -404,10 +404,23 @@ void Solve(int x)
 int main()
 {
     // function
-    std::string yFunction = "xxx";
+    std::string input = "y=xxxx";
+    input.erase(remove(input.begin(), input.end(), ' '), input.end());
+    std::string yFunction;
+    if (input.find('=') != std::string::npos)
+    {
+        if (input.substr(input.find('=') + 1, input.length() - input.find('=') - 1).find('y') != std::string::npos)
+        {
+            yFunction = input.substr(0, input.length() - (input.length() - input.find('=')));
+        }
+        else
+        {
+            yFunction = input.substr(input.find('=') + 1, input.length() - input.find('=') - 1);
+        }
+    }
     yFunction.insert(yFunction.begin(), '(');
     yFunction.push_back(')');
-    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());
+    yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());    
     std::cout << "Function >>> " << yFunction << std::endl;
 	int nStart = -6;
 	int nEnd = 6;
