@@ -1,13 +1,29 @@
-// ConsoleApplication1.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <random>
 #include <algorithm>
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#include <SDL.h>
 
+const int w = 800;
+const int h = 600;
+
+double wRatio = 50;
+double hRatio = 50;
+
+double wCenter = w/2;
+double hCenter = h/2;
+
+double pStartX;
+double pStartY;
+
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+
+std::string yFunction = "";
 
 // parts of function
 std::vector<std::string> partsOfFunction;
@@ -15,7 +31,8 @@ std::vector<std::string> duplicate;
 std::map<std::string, int> keys;
 
 
-class Coordinates {      
+class Coordinates 
+{      
 public:            
     std::vector<int> open;
     std::vector<int> closed;
@@ -290,7 +307,7 @@ void Parentheses(std::string yFunction)
     }
 }
 
-void Solve(int x)
+double Solve(double x)
 {
     double result = 0;
     char lastSign = '\0';
@@ -399,14 +416,15 @@ void Solve(int x)
             //std::cout << "Result " << part << " >>> " << partsOfFunction[part] << std::endl;
             result = 0;
         }
+        return std::stod(partsOfFunction[partsOfFunction.size() - 1]);
 }
 
-int main()
+void Calculate(std::string input)
 {
-    // function
-    std::string input = "y=xxxx";
+    partsOfFunction.clear();
+    duplicate.clear();
+    keys.clear();
     input.erase(remove(input.begin(), input.end(), ' '), input.end());
-    std::string yFunction;
     if (input.find('=') != std::string::npos)
     {
         if (input.substr(input.find('=') + 1, input.length() - input.find('=') - 1).find('y') != std::string::npos)
@@ -418,12 +436,13 @@ int main()
             yFunction = input.substr(input.find('=') + 1, input.length() - input.find('=') - 1);
         }
     }
+    else 
+    {
+        yFunction = input;
+    }
     yFunction.insert(yFunction.begin(), '(');
     yFunction.push_back(')');
     yFunction.erase(remove(yFunction.begin(), yFunction.end(), ' '), yFunction.end());    
-    std::cout << "Function >>> " << yFunction << std::endl;
-	int nStart = -6;
-	int nEnd = 6;
     if (yFunction.find('x') != std::string::npos)
     {
         for (int i = yFunction.length() - 1; i >= 0; i--)
@@ -439,25 +458,125 @@ int main()
  	yFunction = AddParantheses(yFunction);
 
 	Parentheses(yFunction);
+    duplicate = partsOfFunction;
+    
+}
 
-    if (yFunction.find('x') != std::string::npos)
-    {
-        duplicate = partsOfFunction;
-        for (int x = nStart; x <= nEnd; x++)
-        {
-            Solve(x);
-            std::cout << "x: " << x << " y: " << std::stod(partsOfFunction[partsOfFunction.size() - 1]) << std::endl;
+void draw() {
+    // Clear screen
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // white
+    SDL_RenderClear(renderer);
+
+    // Draw axes in black
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    // X-axis
+    SDL_RenderDrawLine(renderer, 0, h/2, w, h/2);
+    // Y-axis
+    SDL_RenderDrawLine(renderer, w/2, 0, w/2, h);
+
+    // X-axis lines
+    for (double x = wCenter; x >= 0; x -= wRatio) {
+        SDL_RenderDrawLine(renderer, x, h/2 - 10, x, h/2 + 10);
+    }
+    for (double x = wCenter; x <= w; x += wRatio) {
+        SDL_RenderDrawLine(renderer, x, h/2 - 10, x, h/2 + 10);
+    }
+
+    // Y-axis lines
+    for (double y = hCenter; y >= 0; y -= hRatio) {
+        SDL_RenderDrawLine(renderer, w/2 - 10, y, w/2 + 10, y);
+    }
+
+    for (double y = hCenter; y <= h; y += hRatio) {
+        SDL_RenderDrawLine(renderer, w/2 - 10, y, w/2 + 10, y);
+    }
+
+    // Draw simple function y = x^2
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // red
+
+        for (double x = -w/2/wRatio; x <= w/2/wRatio; x += 0.01) {
+            if (x == -w/2/wRatio)
+            {
+                double y0 = Solve(x);
+                partsOfFunction = duplicate;
+                pStartX = int(x * wRatio + w/2);        // pixel X for first point
+                pStartY = int(-y0 * hRatio + h/2);      // pixel Y for first point
+            }
+            double y = Solve(x); // change to x^4 + 4*x^3 if you want
             partsOfFunction = duplicate;
+            int cx = int(x * wRatio + w/2);
+            int cy = int(-y * hRatio + h/2);
+            SDL_RenderDrawLine(renderer, (int)pStartX, (int)pStartY, cx, cy);
+            pStartX = cx;
+            pStartY = cy;
+        }
+        
+    SDL_RenderPresent(renderer);
+}
+
+// JavaScript function to get input text
+EM_JS(char*, get_input_text, (), {
+  const value = document.getElementById('userInput').value;
+  const lengthBytes = lengthBytesUTF8(value) + 1;
+  const stringOnWasmHeap = _malloc(lengthBytes);
+  stringToUTF8(value, stringOnWasmHeap, lengthBytes);
+  return stringOnWasmHeap;
+});
+
+// Function C++ will call every time the text changes
+extern "C" {
+EMSCRIPTEN_KEEPALIVE
+void onInputChange() {
+  char* text = get_input_text();
+  std::string inputText(text);
+  free(text);
+
+  //std::cout << "User typed: " << inputText << std::endl;
+
+  // Recompute using the typed string
+  Calculate(inputText);
+  draw();
+
+  EM_ASM({
+    var s = UTF8ToString($0);
+    var el = document.getElementById('liveText');
+    if (el) el.innerText = 'Live text: ' + s;
+  }, inputText.c_str());
+}
+}
+
+
+void main_loop() {
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+        if(event.type == SDL_QUIT) emscripten_cancel_main_loop();
+        if(event.type == SDL_MOUSEWHEEL) {
+            wRatio -= event.wheel.y * 2; // zoom factor
+            hRatio -= event.wheel.y * 2;
+            if(wRatio < 5) wRatio = 5;
+            if(hRatio < 5) hRatio = 5;
         }
     }
-    else
-    {
-        Solve(0);
-		std::cout << "Result: " << std::stod(partsOfFunction[partsOfFunction.size() - 1]) << std::endl;
-    }
+    draw();
+}
+
+
+
+int main()
+{
+    Calculate("");
     
-	//std::cout << std::endl << "RESULT >>> " << result << std::endl;
+	SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow("SDL Graph", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_SHOWN);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_EventState(SDL_KEYDOWN, SDL_DISABLE);
+    SDL_EventState(SDL_KEYUP, SDL_DISABLE);
+    SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
 
+    emscripten_set_main_loop(main_loop, 0, 1);
 
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
